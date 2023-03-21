@@ -1,5 +1,4 @@
 import json
-import os
 import sys
 import graderUtil
 import numpy as np
@@ -14,9 +13,7 @@ task_result = {
 
 #######################################################################
 # read task file content
-#task_file = sys.argv[1]
-tasks = ["task_0_0.txt", "task_0_1.txt", "task_1_0.txt", "task_1_1.txt", "task_2_1.txt", "task_3_1.txt"]
-task_file = tasks[4]
+task_file = sys.argv[1]
 task_content = graderUtil.load_task_file(task_file)
 if task_content:
     print(task_content)
@@ -30,17 +27,17 @@ def random_restart(park, iteration):
     for p in park.playgrounds:
         avail_areas.remove([p.x, p.y])  # exclude areas of the playgrounds
 
-    costs, solutions = [[None]*n_times for i in range(2)]
     # hill-climbing for n times
+    costs, solutions = [[None]*n_times for i in range(2)]
     if len(park.restrooms) == 0:
         park.add_restrooms(rand.sample(avail_areas, int(park.num_restrooms)))  # generate random restroom locations
-    #print(f"1th: cost {park.cost()}, initial state {[[r.x, r.y] for r in park.restrooms]}")
+    #DEBUG# print(f"1th: cost {park.cost()}, initial state {[[r.x, r.y] for r in park.restrooms]}")
     costs[0], solutions[0] = hill_climbing(park)
     for i in range(n_times-1):
         test_areas = [x for x in avail_areas if x != solutions[i]]  # candidates list (exclude previous test subject)
         park.restrooms.clear()
         park.add_restrooms(rand.sample(test_areas, int(park.num_restrooms)))
-        #print(f"{i+2}th: cost {park.cost()}, initial state {[[r.x, r.y] for r in park.restrooms]}")
+        #DEBUG# print(f"{i+2}th: cost {park.cost()}, initial state {[[r.x, r.y] for r in park.restrooms]}")
         costs[i+1], solutions[i+1] = hill_climbing(park)
 
     return min(costs), solutions[np.argmin(costs)]  # return best_cost and locations of the task_result
@@ -59,10 +56,10 @@ def hill_climbing(park):
             distance = [calc_dist(n, p_list) for n in neighbors]  # evaluate total distance for each neighbor
             best_neighbor = neighbors[np.argmin(distance)]  # get the minimum distance neighbor
             r_list[i] = best_neighbor
-            #print(f"restroom {i}: cost {park.cost()}, move from {[orig_state[i].x, orig_state[i].y]} to {[r_list[i].x, r_list[i].y]}")
+            #DEBUG# print(f"restroom {i}: cost {park.cost()}, move from {[orig_state[i].x, orig_state[i].y]} to {[r_list[i].x, r_list[i].y]}")
             if park.cost() >= orig_cost:
                 r_list[i] = orig_state[i]
-                #print(f"restroom {i}: move back to {[r_list[i].x, r_list[i].y]}")
+                #DEBUG# print(f"restroom {i}: move back to {[r_list[i].x, r_list[i].y]}")
 
         # If the candidates aren’t better, stop. Otherwise, continue with the candidates.
         if park.cost() >= orig_cost:
@@ -81,7 +78,7 @@ def get_neighbors(park, restroom):
     x = restroom.x
     y = restroom.y
     neighbors = []
-    modifications = [-1, 1]
+    modifications = [-1, 1]  # the neighbors are at the up, down, left, or right side
 
     # get neighbors' locations
     for i in modifications:
@@ -96,6 +93,7 @@ def get_neighbors(park, restroom):
     for p in park.playgrounds:
         if [p.x, p.y] in neighbors:
             neighbors.remove([p.x, p.y])
+    
     return [graderUtil.Restroom(item) for item in neighbors]
 
 
@@ -111,6 +109,7 @@ elif task_content[0] == "1":  # random restart
     task_result["best_cost"], task_result["locations"] = random_restart(task_park, task_content[4])
 else:
     print("ERROR: Algorithm type undefined.")
+
 
 # END_YOUR_CODE
 #######################################################################

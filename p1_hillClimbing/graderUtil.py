@@ -4,7 +4,7 @@ import os
 #import sys
 
 task_dir = "./task"
-py_command = "python3"
+py_command = "python"
 py_code = "submission.py"
 
 def load_task_file(filename):
@@ -118,6 +118,8 @@ class Playground:
     
     def min_dist(self, r_list):
         return min([manhattan_dist(self,r) for r in r_list])
+    
+
 
 class Restroom:
     
@@ -131,6 +133,7 @@ class Restroom:
             #print(tmp)    
         self.x = int(tmp[0])
         self.y = int(tmp[1])
+
 
 class Park:
     playgrounds = []
@@ -149,10 +152,10 @@ class Park:
         if len(tmp) > 1:
             self.restrooms = [Restroom(r) for r in tmp[1:]]
     
-    def is_conflict(self, r):
+    def is_conflict(slef, r):
         is_in = False
         #print(r)
-        for p in self.playgrounds:
+        for p in slef.playgrounds:
             if (r[0] == p.x) & (r[1] == p.y):
                 is_in = True
                 break
