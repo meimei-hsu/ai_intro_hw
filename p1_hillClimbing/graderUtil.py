@@ -136,8 +136,6 @@ class Park:
     playgrounds = []
     restrooms = []
     def __init__(self, park_info):
-        self.algo_code = park_info[0]
-
         size_info = park_info[1].split(",")
         self.num_rows = int(size_info[0])
         self.num_cols = int(size_info[1])
