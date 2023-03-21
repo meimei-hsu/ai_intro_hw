@@ -16,12 +16,14 @@ task_result = {
 # read task file content
 #task_file = sys.argv[1]
 tasks = ["task_0_0.txt", "task_0_1.txt", "task_1_0.txt", "task_1_1.txt", "task_2_1.txt", "task_3_1.txt"]
-task_file = tasks[4]
+task_file = tasks[3]
 task_content = graderUtil.load_task_file(task_file)
 if task_content:
     print(task_content)
 
 # BEGIN_YOUR_CODE
+
+
 def random_restart(park, iteration):
     n_times = int(iteration)
     avail_areas = [[i, j] for i in range(park.num_rows) for j in range(park.num_cols)]  # list of areas from given size
@@ -49,15 +51,19 @@ def hill_climbing(park):
     while True:
         orig_state = r_list.copy()
         orig_cost = park.cost()
+
         # find the candidates
         for i in range(len(r_list)):
             neighbors = get_neighbors(park, r_list[i])  # get neighbors of r
             distance = [calc_dist(n, p_list) for n in neighbors]  # evaluate total distance for each neighbor
             best_neighbor = neighbors[np.argmin(distance)]  # get the minimum distance neighbor
             r_list[i] = best_neighbor
+            print(f"{i}: cost {park.cost()}, move from {[orig_state[i].x, orig_state[i].y]} to {[r_list[i].x, r_list[i].y]}")
+            if park.cost() >= orig_cost:
+                r_list[i] = orig_state[i]
+                print(f"{i}: move back to {[r_list[i].x, r_list[i].y]}")
 
-        # if the candidates aren’t better, stop
-        # otherwise, continue with the candidates
+        # If the candidates aren’t better, stop. Otherwise, continue with the candidates.
         if park.cost() >= orig_cost:
             r_list = orig_state
             return park.cost(), [[r.x, r.y] for r in r_list]  # return best_cost and locations of the task_result
@@ -71,27 +77,25 @@ def calc_dist(r, p_list):
 
 
 def get_neighbors(park, restroom):
-    neighbours = []
-    x = restroom.x  # current state coordinates
+    x = restroom.x
     y = restroom.y
-    modifications = [-1, 0, 1]  # the neighbor is within the nine-square grid of the current state.
+    neighbors = []
+    modifications = [-1, 1]
 
     # get neighbors' locations
     for i in modifications:
         x_new = x + i
+        y_new = y + i
         if not x_new < 0 and not x_new > park.num_rows - 1:  # exclude locations outside the borders
-            for j in modifications:
-                y_new = y + j
-                if not y_new < 0 and not y_new > park.num_cols - 1:
-                    neighbours.append([x_new, y_new])
+            neighbors.append([x_new, y])
+        if not y_new < 0 and not y_new > park.num_cols - 1:  # exclude locations outside the borders
+            neighbors.append([x, y_new])
 
     # remove unavailable locations
-    neighbours.remove([x, y])
     for p in park.playgrounds:
-        if [p.x, p.y] in neighbours:
-            neighbours.remove([p.x, p.y])
-
-    return [graderUtil.Restroom(item) for item in neighbours]
+        if [p.x, p.y] in neighbors:
+            neighbors.remove([p.x, p.y])
+    return [graderUtil.Restroom(item) for item in neighbors]
 
 
 # task result
